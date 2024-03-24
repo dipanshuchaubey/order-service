@@ -1,6 +1,8 @@
 # Order Service
 
 ## HLD
+![pub-sub-golang (1)](https://github.com/dipanshuchaubey/order-service/assets/41301181/2495d173-eca4-4604-a579-4e7cff687792)
+
 
 ## Install Kratos
 
