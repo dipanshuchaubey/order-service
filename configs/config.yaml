@@ -21,8 +21,8 @@ publisher:
     max_batch_size: 10
 consumer:
   order_consumer:
-    provider: "sqs"
-    region: ""
-    queue_url: ""
+    provider: sqs
+    region: ap-south-1
+    queue_url: https://sqs.ap-south-1.amazonaws.com/731315896571/order-service-queue.fifo
     raw_message: false
-    wait_time: 0
+    wait_time: 30

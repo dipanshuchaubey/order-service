@@ -8,6 +8,7 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Consumer consumer = 3;
 }
 
 message Server {
@@ -38,4 +39,16 @@ message Data {
   }
   Database database = 1;
   Redis redis = 2;
+}
+
+message Consumer {
+  message Queue {
+    string provider = 1;
+    string region = 2;
+    string queue_url = 3;
+    bool raw_message = 4;
+    int32 wait_time = 5;
+  }
+
+  Queue order_consumer = 1;
 }
