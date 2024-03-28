@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"order-service/internal/biz/order_sync"
@@ -19,24 +20,6 @@ type OrderConsumer struct {
 	conf    *conf.Consumer
 }
 
-type MessageData struct {
-	Event      string `json:"event"`
-	OrderID    string `json:"order_id"`
-	CartID     string `json:"cart_id"`
-	PaymentRef string `json:"payment_ref"`
-	OrderTime  int32  `json:"order_time"`
-}
-
-type MessageBody struct {
-	Type           string `json:"Type"`
-	MessageId      string `json:"MessageId"`
-	SequenceNumber string `json:"SequenceNumber"`
-	TopicArn       string `json:"TopicArn"`
-	Subject        string `json:"Subject"`
-	Message        string `json:"Message"`
-	Timestamp      string `json:"Timestamp"`
-}
-
 func NewOrderConsumer(conf *conf.Consumer, handler order_sync.ISyncOrderHandler, logger log.Logger) (*OrderConsumer, error) {
 	return &OrderConsumer{
 		log:     log.NewHelper(logger),
@@ -47,30 +30,16 @@ func NewOrderConsumer(conf *conf.Consumer, handler order_sync.ISyncOrderHandler,
 
 func (c *OrderConsumer) Consume() error {
 	c.log.Info("OrderConsumer:: Starting to consume messages from queue...")
-	must := session.Must(session.NewSessionWithOptions(session.Options{
-		Config: aws.Config{
-			Region: aws.String(c.conf.OrderConsumer.Region),
-			Credentials: credentials.NewStaticCredentials(
-				"", "", "",
-			),
-		},
-	}))
+	ctx := context.TODO()
 
+	// Create SQS session =--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=
+	must := c.createSQSSession()
 	svc := sqs.New(must)
 	c.log.Info("OrderConsumer:: Session created successfully...")
 
 	for {
-		msgResult, msgErr := svc.ReceiveMessage(&sqs.ReceiveMessageInput{
-			AttributeNames: []*string{
-				aws.String(sqs.MessageSystemAttributeNameSentTimestamp),
-			},
-			MessageAttributeNames: []*string{
-				aws.String(sqs.QueueAttributeNameAll),
-			},
-			QueueUrl:            aws.String(c.conf.OrderConsumer.QueueUrl),
-			MaxNumberOfMessages: aws.Int64(10),
-			VisibilityTimeout:   aws.Int64(int64(c.conf.OrderConsumer.WaitTime)),
-		})
+		// Read messages from queue =--=--=--=--=--=--=--=--=--=--=--=--=
+		msgResult, msgErr := c.readMessagesFromQueue(svc)
 		if msgErr != nil {
 			fmt.Println("Error reading message from queue: ", msgErr)
 			return msgErr
@@ -82,7 +51,7 @@ func (c *OrderConsumer) Consume() error {
 		ack := make([]*sqs.DeleteMessageBatchRequestEntry, 0)
 		c.log.Infof("Messages read from queue: %d", len(msgResult.Messages))
 		for _, message := range msgResult.Messages {
-			var body MessageBody
+			var body order_sync.MessageBody
 			decodeErr := json.Unmarshal([]byte(*message.Body), &body)
 			if decodeErr != nil {
 				errMsg := fmt.Sprintf("Error decoding message body: %s", decodeErr)
@@ -90,7 +59,7 @@ func (c *OrderConsumer) Consume() error {
 				continue
 			}
 
-			var data MessageData
+			var data order_sync.MessageData
 			decodeErr = json.Unmarshal([]byte(body.Message), &data)
 			if decodeErr != nil {
 				errMsg := fmt.Sprintf("Error decoding message data: %s", decodeErr)
@@ -98,14 +67,15 @@ func (c *OrderConsumer) Consume() error {
 				continue
 			}
 
+			// Process message =--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=
+			c.handler.Handler(ctx, body.MessageId, data)
+
 			ack = append(ack, &sqs.DeleteMessageBatchRequestEntry{Id: &body.MessageId, ReceiptHandle: message.ReceiptHandle})
 		}
 
 		if len(ack) > 0 {
-			_, ackErr := svc.DeleteMessageBatch(&sqs.DeleteMessageBatchInput{
-				QueueUrl: aws.String(c.conf.OrderConsumer.QueueUrl),
-				Entries:  ack,
-			})
+			// Acknowledge messages =--=--=--=--=--=--=--=--=--=--=--=--=--=--=
+			_, ackErr := c.acknowledgeQueueMessages(svc, ack)
 			if ackErr != nil {
 				errMsg := fmt.Sprintf("Error deleting messages from queue: %s", ackErr)
 				c.log.Errorf(errMsg)
@@ -115,4 +85,36 @@ func (c *OrderConsumer) Consume() error {
 			c.log.Infof("Acknowledge messages from queue: %d", len(ack))
 		}
 	}
+}
+
+func (c *OrderConsumer) createSQSSession() *session.Session {
+	return session.Must(session.NewSessionWithOptions(session.Options{
+		Config: aws.Config{
+			Region: aws.String(c.conf.OrderConsumer.Region),
+			Credentials: credentials.NewStaticCredentials(
+				"", "", "",
+			),
+		},
+	}))
+}
+
+func (c *OrderConsumer) readMessagesFromQueue(svc *sqs.SQS) (*sqs.ReceiveMessageOutput, error) {
+	return svc.ReceiveMessage(&sqs.ReceiveMessageInput{
+		AttributeNames: []*string{
+			aws.String(sqs.MessageSystemAttributeNameSentTimestamp),
+		},
+		MessageAttributeNames: []*string{
+			aws.String(sqs.QueueAttributeNameAll),
+		},
+		QueueUrl:            aws.String(c.conf.OrderConsumer.QueueUrl),
+		MaxNumberOfMessages: aws.Int64(10),
+		VisibilityTimeout:   aws.Int64(int64(c.conf.OrderConsumer.WaitTime)),
+	})
+}
+
+func (c *OrderConsumer) acknowledgeQueueMessages(svc *sqs.SQS, ackMsg []*sqs.DeleteMessageBatchRequestEntry) (*sqs.DeleteMessageBatchOutput, error) {
+	return svc.DeleteMessageBatch(&sqs.DeleteMessageBatchInput{
+		QueueUrl: aws.String(c.conf.OrderConsumer.QueueUrl),
+		Entries:  ackMsg,
+	})
 }
