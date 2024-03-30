@@ -1,8 +1,7 @@
 # Order Service
 
 ## HLD
-![pub-sub-golang (1)](https://github.com/dipanshuchaubey/order-service/assets/41301181/2495d173-eca4-4604-a579-4e7cff687792)
-
+![pub-sub-golang drawio](https://github.com/dipanshuchaubey/order-service/assets/41301181/7e7eb37d-0a6a-4c68-837e-613ea65eceb8)
 
 ## Install Kratos
 
