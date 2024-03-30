@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package order.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "order-service/api/v1/order;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.order.v1";
+option java_outer_classname = "orderProtoV1";
+
+service Order {
+  rpc GetAllOrders (GetAllOrdersForUserRequest) returns (GetAllOrdersForUserReply) {
+    option (google.api.http) = {
+      get: "/order/{user_id}"
+    };
+  }
+}
+
+message GetAllOrdersForUserRequest {
+  string user_id = 1;
+}
+
+
+message OrderData {
+  int64 id = 1;
+  int64 customer_id = 2;
+  int64 cart_id = 3;
+  string payment_ref = 4;
+  string status = 5;
+  int64 server_id = 6;
+  string created_at = 7;
+}
+
+message GetAllOrdersForUserReply {
+  repeated OrderData orders = 1;
+}

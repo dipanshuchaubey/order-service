@@ -16,7 +16,7 @@ type ordersRepository struct {
 
 type OrdersRepository interface {
 	GetAllOrders(ctx context.Context) ([]*entity.OrdersEntity, error)
-	GetOrdersByCustomerID(ctx context.Context, customerID string) ([]*entity.OrdersEntity, error)
+	GetOrdersByCustomerID(ctx context.Context, customerID int64) ([]*entity.OrdersEntity, error)
 	GetOrderDetails(ctx context.Context, orderID string) (*entity.OrdersEntity, error)
 }
 
@@ -34,7 +34,7 @@ func (repo *ordersRepository) GetAllOrders(ctx context.Context) ([]*entity.Order
 }
 
 // GetOrdersByCustomerID:: Get all orders for a customer
-func (repo *ordersRepository) GetOrdersByCustomerID(ctx context.Context, customerID string) ([]*entity.OrdersEntity, error) {
+func (repo *ordersRepository) GetOrdersByCustomerID(ctx context.Context, customerID int64) ([]*entity.OrdersEntity, error) {
 	var orders []*entity.OrdersEntity
 	if err := repo.db.Table(entity.OrdersTableName).Where("customer_id = ?", customerID).Find(&orders).Error; err != nil {
 		return nil, err

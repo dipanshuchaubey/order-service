@@ -3,8 +3,7 @@
 
 openapi: 3.0.3
 info:
-    title: Greeter API
-    description: The greeting service definition.
+    title: ""
     version: 0.0.1
 paths:
     /health:
@@ -38,6 +37,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /order/{userId}:
+        get:
+            tags:
+                - Order
+            operationId: Order_GetAllOrders
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.GetAllOrdersForUserReply'
 components:
     schemas:
         helloworld.v1.HealthCheckReply:
@@ -51,5 +68,31 @@ components:
                 message:
                     type: string
             description: The response message containing the greetings
+        order.v1.GetAllOrdersForUserReply:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v1.OrderData'
+        order.v1.OrderData:
+            type: object
+            properties:
+                id:
+                    type: string
+                customerId:
+                    type: string
+                cartId:
+                    type: string
+                paymentRef:
+                    type: string
+                status:
+                    type: string
+                serverId:
+                    type: string
+                createdAt:
+                    type: string
 tags:
     - name: Greeter
+      description: The greeting service definition.
+    - name: Order
