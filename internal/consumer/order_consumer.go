@@ -90,10 +90,8 @@ func (c *OrderConsumer) Consume() error {
 func (c *OrderConsumer) createSQSSession() *session.Session {
 	return session.Must(session.NewSessionWithOptions(session.Options{
 		Config: aws.Config{
-			Region: aws.String(c.conf.OrderConsumer.Region),
-			Credentials: credentials.NewStaticCredentials(
-				"", "", "",
-			),
+			Region:      aws.String(c.conf.OrderConsumer.Region),
+			Credentials: credentials.NewEnvCredentials(),
 		},
 	}))
 }

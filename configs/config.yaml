@@ -15,10 +15,7 @@ data:
     write_timeout: 0.2s
 publisher:
   order_publisher:
-    topic: ""
-    region: ""
-    min_batch_size: 1
-    max_batch_size: 10
+    topic_arn: "arn:aws:sns:ap-south-1:731315896571:OrderPublisher.fifo"
 consumer:
   order_consumer:
     provider: sqs

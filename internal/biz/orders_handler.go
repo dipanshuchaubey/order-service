@@ -4,7 +4,7 @@ import (
 	"context"
 	v1 "order-service/api/v1/order"
 	"order-service/internal/data"
-	"strconv"
+	"order-service/internal/data/entity"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -19,24 +19,35 @@ func NewOrdersHandler(repo data.OrdersRepository, logger log.Logger) *OrdersHand
 }
 
 func (h *OrdersHandler) GetOrdersForUser(ctx context.Context, userID string) ([]*v1.OrderData, error) {
-	userIDInt64, _ := strconv.ParseInt(userID, 10, 64)
-	res, err := h.repo.GetOrdersByCustomerID(ctx, userIDInt64)
+	res, err := h.repo.GetOrdersByCustomerID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	var orders []*v1.OrderData
 	for _, order := range res {
-		orders = append(orders, &v1.OrderData{
-			Id:         order.ID,
-			CartId:     order.CartID,
-			CustomerId: order.CustomerID,
-			Status:     order.Status,
-			PaymentRef: order.PaymentRef,
-			ServerId:   order.ServerID,
-			CreatedAt:  order.CreatedAt.String(),
-		})
+		info := v1.OrderData{}
+		order.ToProto(&info)
+		orders = append(orders, &info)
 	}
 
 	return orders, nil
+}
+
+func (h *OrdersHandler) CreateOrder(ctx context.Context, req *v1.CreateOrderRequest) (*v1.CreateOrderReply, error) {
+	var order entity.OrdersEntity
+	order.FromCreateOrderRequest(req)
+
+	// Validate the request
+
+	// Create the order
+	createdOrder, err := h.repo.CreateOrder(ctx, &order)
+	if err != nil {
+		return nil, err
+	}
+
+	var orderData v1.OrderData
+	createdOrder.ToProto(&orderData)
+
+	return &v1.CreateOrderReply{Order: &orderData, Success: true}, nil
 }

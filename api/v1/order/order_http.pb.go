@@ -19,15 +19,18 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationOrderCreateOrder = "/order.v1.Order/CreateOrder"
 const OperationOrderGetAllOrders = "/order.v1.Order/GetAllOrders"
 
 type OrderHTTPServer interface {
+	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderReply, error)
 	GetAllOrders(context.Context, *GetAllOrdersForUserRequest) (*GetAllOrdersForUserReply, error)
 }
 
 func RegisterOrderHTTPServer(s *http.Server, srv OrderHTTPServer) {
 	r := s.Route("/")
 	r.GET("/order/{user_id}", _Order_GetAllOrders0_HTTP_Handler(srv))
+	r.POST("/order", _Order_CreateOrder0_HTTP_Handler(srv))
 }
 
 func _Order_GetAllOrders0_HTTP_Handler(srv OrderHTTPServer) func(ctx http.Context) error {
@@ -52,7 +55,30 @@ func _Order_GetAllOrders0_HTTP_Handler(srv OrderHTTPServer) func(ctx http.Contex
 	}
 }
 
+func _Order_CreateOrder0_HTTP_Handler(srv OrderHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateOrderRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOrderCreateOrder)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateOrder(ctx, req.(*CreateOrderRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateOrderReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type OrderHTTPClient interface {
+	CreateOrder(ctx context.Context, req *CreateOrderRequest, opts ...http.CallOption) (rsp *CreateOrderReply, err error)
 	GetAllOrders(ctx context.Context, req *GetAllOrdersForUserRequest, opts ...http.CallOption) (rsp *GetAllOrdersForUserReply, err error)
 }
 
@@ -62,6 +88,19 @@ type OrderHTTPClientImpl struct {
 
 func NewOrderHTTPClient(client *http.Client) OrderHTTPClient {
 	return &OrderHTTPClientImpl{client}
+}
+
+func (c *OrderHTTPClientImpl) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...http.CallOption) (*CreateOrderReply, error) {
+	var out CreateOrderReply
+	pattern := "/order"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationOrderCreateOrder))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *OrderHTTPClientImpl) GetAllOrders(ctx context.Context, in *GetAllOrdersForUserRequest, opts ...http.CallOption) (*GetAllOrdersForUserReply, error) {

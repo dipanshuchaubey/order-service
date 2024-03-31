@@ -37,6 +37,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /order:
+        post:
+            tags:
+                - Order
+            operationId: Order_CreateOrder
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v1.CreateOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.CreateOrderReply'
     /order/{userId}:
         get:
             tags:
@@ -68,6 +86,22 @@ components:
                 message:
                     type: string
             description: The response message containing the greetings
+        order.v1.CreateOrderReply:
+            type: object
+            properties:
+                order:
+                    $ref: '#/components/schemas/order.v1.OrderData'
+                success:
+                    type: boolean
+        order.v1.CreateOrderRequest:
+            type: object
+            properties:
+                cartId:
+                    type: string
+                customerId:
+                    type: string
+                paymentRef:
+                    type: string
         order.v1.GetAllOrdersForUserReply:
             type: object
             properties:

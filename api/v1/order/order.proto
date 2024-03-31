@@ -15,6 +15,12 @@ service Order {
       get: "/order/{user_id}"
     };
   }
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderReply) {
+    option (google.api.http) = {
+      post: "/order",
+      body: "*"
+    };
+  }
 }
 
 message GetAllOrdersForUserRequest {
@@ -32,6 +38,17 @@ message OrderData {
   string created_at = 7;
 }
 
+message CreateOrderRequest {
+  int64 cart_id = 1;
+  int64 customer_id = 2;
+  string payment_ref = 3;
+}
+
 message GetAllOrdersForUserReply {
   repeated OrderData orders = 1;
+}
+
+message CreateOrderReply {
+  OrderData order = 1;
+  bool success = 2;
 }

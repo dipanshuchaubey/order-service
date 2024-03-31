@@ -24,3 +24,11 @@ func (s *OrderService) GetAllOrders(ctx context.Context, req *v1.GetAllOrdersFor
 	}
 	return &v1.GetAllOrdersForUserReply{Orders: res}, nil
 }
+
+func (s *OrderService) CreateOrder(ctx context.Context, req *v1.CreateOrderRequest) (*v1.CreateOrderReply, error) {
+	res, err := s.handler.CreateOrder(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
