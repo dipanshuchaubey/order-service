@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	v1 "order-service/api/v1/order"
+	"order-service/internal/biz/interfaces"
 	"order-service/internal/data"
 	"order-service/internal/data/entity"
 
@@ -14,7 +15,7 @@ type OrdersHandler struct {
 	log  *log.Helper
 }
 
-func NewOrdersHandler(repo data.OrdersRepository, logger log.Logger) *OrdersHandler {
+func NewOrdersHandler(repo data.OrdersRepository, logger log.Logger) interfaces.OrdersHandlerInterface {
 	return &OrdersHandler{repo, log.NewHelper(logger)}
 }
 

@@ -1,7 +1,6 @@
 package server
 
 import (
-	hello "order-service/api/v1/helloworld"
 	order "order-service/api/v1/order"
 	"order-service/internal/conf"
 	"order-service/internal/service"
@@ -12,7 +11,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, orderService *service.OrderService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, orderService *service.OrderService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -28,7 +27,6 @@ func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, orderService
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	hello.RegisterGreeterServer(srv, greeter)
 	order.RegisterOrderServer(srv, orderService)
 	return srv
 }

@@ -3,40 +3,9 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: Order API
     version: 0.0.1
 paths:
-    /health:
-        get:
-            tags:
-                - Greeter
-            operationId: Greeter_HealthCheck
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/helloworld.v1.HealthCheckReply'
-    /helloworld/{name}:
-        get:
-            tags:
-                - Greeter
-            description: Sends a greeting
-            operationId: Greeter_SayHello
-            parameters:
-                - name: name
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/helloworld.v1.HelloReply'
     /order:
         post:
             tags:
@@ -75,17 +44,6 @@ paths:
                                 $ref: '#/components/schemas/order.v1.GetAllOrdersForUserReply'
 components:
     schemas:
-        helloworld.v1.HealthCheckReply:
-            type: object
-            properties:
-                status:
-                    type: string
-        helloworld.v1.HelloReply:
-            type: object
-            properties:
-                message:
-                    type: string
-            description: The response message containing the greetings
         order.v1.CreateOrderReply:
             type: object
             properties:
@@ -127,6 +85,4 @@ components:
                 createdAt:
                     type: string
 tags:
-    - name: Greeter
-      description: The greeting service definition.
     - name: Order

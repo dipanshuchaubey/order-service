@@ -2,18 +2,16 @@ package service
 
 import (
 	"context"
-
 	v1 "order-service/api/v1/order"
-	"order-service/internal/biz"
+	"order-service/internal/biz/interfaces"
 )
 
 type OrderService struct {
 	v1.UnimplementedOrderServer
-
-	handler *biz.OrdersHandler
+	handler interfaces.OrdersHandlerInterface
 }
 
-func NewOrderService(handler *biz.OrdersHandler) *OrderService {
+func NewOrderService(handler interfaces.OrdersHandlerInterface) *OrderService {
 	return &OrderService{handler: handler}
 }
 
