@@ -1,4 +1,4 @@
-package order_sync
+package handler
 
 import (
 	"context"

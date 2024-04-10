@@ -8,9 +8,9 @@ package main
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"order-service/internal/biz/order_sync"
+	"order-service/consumer"
+	"order-service/consumer/handler"
 	"order-service/internal/conf"
-	"order-service/internal/consumer"
 	"order-service/internal/data"
 )
 
@@ -23,7 +23,7 @@ func wireApp(confData *conf.Data, confConsumer *conf.Consumer, consumer_Queue *c
 		return nil, nil, err
 	}
 	ordersRepository := data.NewOrdersRepository(dataData, logger)
-	iSyncOrderHandler := order_sync.NewSyncOrderHandler(logger, ordersRepository)
+	iSyncOrderHandler := handler.NewSyncOrderHandler(logger, ordersRepository)
 	orderConsumer, err := consumer.NewOrderConsumer(confConsumer, iSyncOrderHandler, logger)
 	if err != nil {
 		cleanup()

@@ -1,6 +1,12 @@
-package order_sync
+package handler
 
-import "context"
+import (
+	"context"
+
+	"github.com/google/wire"
+)
+
+var ProviderSet = wire.NewSet(NewSyncOrderHandler)
 
 type ISyncOrderHandler interface {
 	Handler(ctx context.Context, messageID string, message MessageData) error

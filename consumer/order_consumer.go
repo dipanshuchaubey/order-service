@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"order-service/internal/biz/order_sync"
+	"order-service/consumer/handler"
 	"order-service/internal/conf"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -16,11 +16,11 @@ import (
 
 type OrderConsumer struct {
 	log     *log.Helper
-	handler order_sync.ISyncOrderHandler
+	handler handler.ISyncOrderHandler
 	conf    *conf.Consumer
 }
 
-func NewOrderConsumer(conf *conf.Consumer, handler order_sync.ISyncOrderHandler, logger log.Logger) (*OrderConsumer, error) {
+func NewOrderConsumer(conf *conf.Consumer, handler handler.ISyncOrderHandler, logger log.Logger) (*OrderConsumer, error) {
 	return &OrderConsumer{
 		log:     log.NewHelper(logger),
 		handler: handler,
@@ -51,7 +51,7 @@ func (c *OrderConsumer) Consume() error {
 		ack := make([]*sqs.DeleteMessageBatchRequestEntry, 0)
 		c.log.Infof("Messages read from queue: %d", len(msgResult.Messages))
 		for _, message := range msgResult.Messages {
-			var body order_sync.MessageBody
+			var body handler.MessageBody // TODO: Move this to types
 			decodeErr := json.Unmarshal([]byte(*message.Body), &body)
 			if decodeErr != nil {
 				errMsg := fmt.Sprintf("Error decoding message body: %s", decodeErr)
@@ -59,7 +59,7 @@ func (c *OrderConsumer) Consume() error {
 				continue
 			}
 
-			var data order_sync.MessageData
+			var data handler.MessageData // TODO: Move this to types
 			decodeErr = json.Unmarshal([]byte(body.Message), &data)
 			if decodeErr != nil {
 				errMsg := fmt.Sprintf("Error decoding message data: %s", decodeErr)
