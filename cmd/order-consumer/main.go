@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"order-service/internal/conf"
+	"order-service/internal/utils"
 	"os"
 
 	"github.com/go-kratos/kratos/v2/config"
@@ -36,7 +37,9 @@ func main() {
 
 	c := config.New(
 		config.WithSource(
-			file.NewSource(flagconf),
+			file.NewSource(
+				utils.ReadConfigFile(flagconf),
+			),
 		),
 	)
 	defer c.Close()

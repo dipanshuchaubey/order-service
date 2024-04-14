@@ -10,9 +10,10 @@ data:
     driver: postgres
     source: "host=%s user=%s password=%s dbname=%s port=%s sslmode=disable"
   redis:
-    addr: 127.0.0.1:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    addr: localhost:6379
+    read_timeout: 5s
+    write_timeout: 5s
+    pool_size: 10
 publisher:
   order_publisher:
     topic_arn: "arn:aws:sns:ap-south-1:731315896571:OrderPublisher.fifo"

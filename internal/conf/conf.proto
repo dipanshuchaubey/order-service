@@ -36,6 +36,7 @@ message Data {
     string addr = 2;
     google.protobuf.Duration read_timeout = 3;
     google.protobuf.Duration write_timeout = 4;
+    int32 pool_size = 5;
   }
   Database database = 1;
   Redis redis = 2;
