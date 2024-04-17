@@ -20,7 +20,7 @@ jobs:
 
       # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Order Service =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
       - name: "[Service] Extract metadata (tags, labels) for Docker"
-        id: meta
+        id: service-meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: dipanshuchaubey/order-service
@@ -31,12 +31,12 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.service-meta.outputs.tags }}
+          labels: ${{ steps.service-meta.outputs.labels }}
 
       # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Order Consumer =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
       - name: "[Consumer] Extract metadata (tags, labels) for Docker"
-        id: meta
+        id: consumer-meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: dipanshuchaubey/order-service-consumer
@@ -47,5 +47,5 @@ jobs:
           context: .
           file: ./Dockerfile-Consumer
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.consumer-meta.outputs.tags }}
+          labels: ${{ steps.consumer-meta.outputs.labels }}
