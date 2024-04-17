@@ -1,6 +1,9 @@
 # Order Service
 
+[![Build Image & Push to Image Registry](https://github.com/dipanshuchaubey/order-service/actions/workflows/cd.yaml/badge.svg)](https://github.com/dipanshuchaubey/order-service/actions/workflows/cd.yaml)
+
 ## HLD
+
 ![pub-sub-golang drawio](https://github.com/dipanshuchaubey/order-service/assets/41301181/7e7eb37d-0a6a-4c68-837e-613ea65eceb8)
 
 ## Install Kratos
