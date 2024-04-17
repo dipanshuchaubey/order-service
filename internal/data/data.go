@@ -21,8 +21,7 @@ type Data struct {
 }
 
 func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
-	dsn := fmt.Sprintf(c.Database.Source, "localhost", "postgres", "", "", "5432")
-	db, dbErr := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, dbErr := gorm.Open(postgres.Open(c.Database.Source), &gorm.Config{})
 	if dbErr != nil {
 		errMsg := fmt.Sprintf("Error opening database connection: %s", dbErr)
 		log.Errorf(errMsg)

@@ -8,9 +8,9 @@ server:
 data:
   database:
     driver: postgres
-    source: "host=%s user=%s password=%s dbname=%s port=%s sslmode=disable"
+    source: "host=pg-master user=postgres password=password dbname=order_service port=5432 sslmode=disable"
   redis:
-    addr: localhost:6379
+    addr: redis:6379
     read_timeout: 5s
     write_timeout: 5s
     pool_size: 10

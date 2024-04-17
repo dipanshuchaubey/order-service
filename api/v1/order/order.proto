@@ -29,7 +29,7 @@ message GetAllOrdersForUserRequest {
 
 
 message OrderData {
-  int64 id = 1;
+  string id = 1;
   int64 customer_id = 2;
   int64 cart_id = 3;
   string payment_ref = 4;

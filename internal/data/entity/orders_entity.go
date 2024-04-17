@@ -2,6 +2,8 @@ package entity
 
 import (
 	v1 "order-service/api/v1/order"
+
+	"github.com/oklog/ulid/v2"
 )
 
 const OrdersTableName = "orders"
@@ -11,7 +13,7 @@ func (*OrdersEntity) TableName() string {
 }
 
 type OrdersEntity struct {
-	ID         int64  `gorm:"column:id;primaryKey;autoIncrement"`
+	ID         string `gorm:"column:id;primaryKey"`
 	CustomerID int64  `gorm:"column:customer_id"`
 	CartID     int64  `gorm:"column:cart_id"`
 	PaymentRef string `gorm:"column:payment_ref_no"`
@@ -31,6 +33,7 @@ func (entity *OrdersEntity) ToProto(data *v1.OrderData) {
 }
 
 func (entity *OrdersEntity) FromCreateOrderRequest(data *v1.CreateOrderRequest) {
+	entity.ID = ulid.Make().String()
 	entity.CustomerID = data.CustomerId
 	entity.PaymentRef = data.PaymentRef
 	entity.CartID = data.CartId

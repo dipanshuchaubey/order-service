@@ -12,6 +12,7 @@ import (
 	"order-service/internal/biz"
 	"order-service/internal/conf"
 	"order-service/internal/data"
+	"order-service/internal/redis"
 	"order-service/internal/server"
 	"order-service/internal/service"
 )
@@ -29,7 +30,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 		return nil, nil, err
 	}
 	ordersRepository := data.NewOrdersRepository(dataData, logger)
-	ordersHandlerInterface := biz.NewOrdersHandler(ordersRepository, logger)
+	redisHandlerInterface := redis.NewCache(confData, logger)
+	ordersHandlerInterface := biz.NewOrdersHandler(ordersRepository, redisHandlerInterface, logger)
 	orderService := service.NewOrderService(ordersHandlerInterface)
 	grpcServer := server.NewGRPCServer(confServer, orderService, logger)
 	httpServer := server.NewHTTPServer(confServer, orderService, logger)

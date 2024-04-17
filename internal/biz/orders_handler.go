@@ -6,17 +6,19 @@ import (
 	"order-service/internal/biz/interfaces"
 	"order-service/internal/data"
 	"order-service/internal/data/entity"
+	"order-service/internal/redis"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
 
 type OrdersHandler struct {
-	repo data.OrdersRepository
-	log  *log.Helper
+	repo  data.OrdersRepository
+	redis redis.RedisHandlerInterface
+	log   *log.Helper
 }
 
-func NewOrdersHandler(repo data.OrdersRepository, logger log.Logger) interfaces.OrdersHandlerInterface {
-	return &OrdersHandler{repo, log.NewHelper(logger)}
+func NewOrdersHandler(repo data.OrdersRepository, cache redis.RedisHandlerInterface, logger log.Logger) interfaces.OrdersHandlerInterface {
+	return &OrdersHandler{repo, cache, log.NewHelper(logger)}
 }
 
 func (h *OrdersHandler) GetOrdersForUser(ctx context.Context, userID string) ([]*v1.OrderData, error) {
@@ -49,6 +51,12 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *v1.CreateOrderRequ
 
 	var orderData v1.OrderData
 	createdOrder.ToProto(&orderData)
+
+	// Cache the order
+	cacheErr := h.redis.Set(ctx, orderData.Id, &orderData)
+	if cacheErr != nil {
+		h.log.Errorf("error caching order: %v", cacheErr)
+	}
 
 	return &v1.CreateOrderReply{Order: &orderData, Success: true}, nil
 }
