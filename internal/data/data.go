@@ -2,8 +2,10 @@ package data
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"order-service/internal/conf"
+	"os"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -20,8 +22,19 @@ type Data struct {
 	sqlDB *sql.DB
 }
 
+type DatabaseCredentials struct {
+	User     string
+	Password string
+}
+
 func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
-	db, dbErr := gorm.Open(postgres.Open(c.Database.Source), &gorm.Config{})
+	credentials := ReadCredentailsFromFile(c.Database.CredentialsPath)
+	if credentials == nil {
+		return nil, nil, fmt.Errorf("error reading database credentials from file")
+	}
+
+	dsn := fmt.Sprintf(c.Database.Source, credentials.User, credentials.Password)
+	db, dbErr := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if dbErr != nil {
 		errMsg := fmt.Sprintf("Error opening database connection: %s", dbErr)
 		log.Errorf(errMsg)
@@ -51,4 +64,21 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 		sqlDB.Close()
 	}
 	return &Data{db, sqlDB}, cleanup, nil
+}
+
+func ReadCredentailsFromFile(path string) *DatabaseCredentials {
+	fileBytes, err := os.ReadFile(path)
+	if err != nil {
+		log.Errorf("ReadCredentailsFromFile :: Error reading '%s' :: %s", path, err)
+		return nil
+	}
+
+	var credentials DatabaseCredentials
+	unMarErr := json.Unmarshal(fileBytes, &credentials)
+	if unMarErr != nil {
+		log.Errorf("ReadCredentailsFromFile :: Error unmarshalling '%s' :: %s", path, unMarErr)
+		return nil
+	}
+
+	return &credentials
 }

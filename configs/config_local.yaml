@@ -8,7 +8,8 @@ server:
 data:
   database:
     driver: postgres
-    source: "host=localhost user=postgres password=password dbname=order_service port=5432 sslmode=disable"
+    source: "host=localhost user=%s password=%s dbname=order_service port=5432 sslmode=disable"
+    credentials_path: /mnt/db-credentials.key
   redis:
     addr: localhost:6379
     read_timeout: 5s
