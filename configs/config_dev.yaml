@@ -8,7 +8,7 @@ server:
 data:
   database:
     driver: postgres
-    source: "host=pg-master user=%s password=%s dbname=order_service port=5432 sslmode=disable"
+    source: "host=dipanshu.ddns.net user=%s password=%s dbname=order_service port=5432 sslmode=disable"
     credentials_path: /mnt/db-credentials
   redis:
     addr: redis:6379
