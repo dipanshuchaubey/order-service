@@ -8,4 +8,5 @@ import (
 type OrdersHandlerInterface interface {
 	GetOrdersForUser(ctx context.Context, userID string) ([]*v1.OrderData, error)
 	CreateOrder(ctx context.Context, req *v1.CreateOrderRequest) (*v1.CreateOrderReply, error)
+	UpdateOrder(ctx context.Context, orderID string) (*v1.CreateOrderReply, error)
 }

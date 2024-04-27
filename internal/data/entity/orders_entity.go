@@ -2,6 +2,7 @@ package entity
 
 import (
 	v1 "order-service/api/v1/order"
+	"order-service/internal/constants"
 
 	"github.com/oklog/ulid/v2"
 )
@@ -37,6 +38,6 @@ func (entity *OrdersEntity) FromCreateOrderRequest(data *v1.CreateOrderRequest) 
 	entity.CustomerID = data.CustomerId
 	entity.PaymentRef = data.PaymentRef
 	entity.CartID = data.CartId
-	entity.Status = "CREATED"
+	entity.Status = constants.OrderPlaced
 	entity.ServerID = 1
 }

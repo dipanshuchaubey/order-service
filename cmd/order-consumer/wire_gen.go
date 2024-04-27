@@ -10,8 +10,10 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"order-service/consumer"
 	"order-service/consumer/handler"
+	"order-service/internal/biz"
 	"order-service/internal/conf"
 	"order-service/internal/data"
+	"order-service/internal/redis"
 )
 
 // Injectors from wire.go:
@@ -23,7 +25,9 @@ func wireApp(confData *conf.Data, confConsumer *conf.Consumer, consumer_Queue *c
 		return nil, nil, err
 	}
 	ordersRepository := data.NewOrdersRepository(dataData, logger)
-	iSyncOrderHandler := handler.NewSyncOrderHandler(logger, ordersRepository)
+	redisHandlerInterface := redis.NewCache(confData, logger)
+	ordersHandlerInterface := biz.NewOrdersHandler(ordersRepository, redisHandlerInterface, logger)
+	iSyncOrderHandler := handler.NewSyncOrderHandler(logger, ordersRepository, ordersHandlerInterface)
 	orderConsumer, err := consumer.NewOrderConsumer(confConsumer, iSyncOrderHandler, logger)
 	if err != nil {
 		cleanup()
