@@ -9,6 +9,7 @@ import (
 	"order-service/internal/biz"
 	"order-service/internal/conf"
 	"order-service/internal/data"
+	"order-service/internal/publisher"
 	"order-service/internal/redis"
 	"order-service/internal/server"
 	"order-service/internal/service"
@@ -19,6 +20,6 @@ import (
 )
 
 // wireApp init kratos application.
-func wireApp(*conf.Server, *conf.Data, log.Logger) (*kratos.App, func(), error) {
-	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, service.ProviderSet, redis.ProviderSet, newApp))
+func wireApp(*conf.Server, *conf.Data, *conf.Publisher, log.Logger) (*kratos.App, func(), error) {
+	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, service.ProviderSet, redis.ProviderSet, publisher.ProviderSet, newApp))
 }

@@ -13,11 +13,14 @@ type ISyncOrderHandler interface {
 }
 
 type MessageData struct {
-	Event      string `json:"event"`
-	OrderID    string `json:"order_id"`
-	CartID     string `json:"cart_id"`
-	PaymentRef string `json:"payment_ref"`
-	OrderTime  int32  `json:"order_time"`
+	Event string `json:"event"`
+	Data  string `json:"data"`
+}
+
+type MessageMeta struct {
+	OrderID    string `json:"ID"`
+	CartID     int64  `json:"CartID"`
+	PaymentRef string `json:"PaymentRef"`
 }
 
 type MessageBody struct {

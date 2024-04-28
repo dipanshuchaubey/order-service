@@ -12,6 +12,7 @@ import (
 	"order-service/internal/biz"
 	"order-service/internal/conf"
 	"order-service/internal/data"
+	"order-service/internal/publisher"
 	"order-service/internal/redis"
 	"order-service/internal/server"
 	"order-service/internal/service"
@@ -24,14 +25,15 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, confPublisher *conf.Publisher, logger log.Logger) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
 	}
 	ordersRepository := data.NewOrdersRepository(dataData, logger)
 	redisHandlerInterface := redis.NewCache(confData, logger)
-	ordersHandlerInterface := biz.NewOrdersHandler(ordersRepository, redisHandlerInterface, logger)
+	publisherInterface := publisher.NewPublisher(logger, confPublisher)
+	ordersHandlerInterface := biz.NewOrdersHandler(ordersRepository, redisHandlerInterface, publisherInterface, logger)
 	orderService := service.NewOrderService(ordersHandlerInterface)
 	grpcServer := server.NewGRPCServer(confServer, orderService, logger)
 	httpServer := server.NewHTTPServer(confServer, orderService, logger)

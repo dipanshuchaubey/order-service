@@ -53,7 +53,7 @@ func main() {
 		panic(err)
 	}
 
-	app, cleanup, err := wireApp(bc.Data, bc.Consumer, bc.GetConsumer().GetOrderConsumer(), logger)
+	app, cleanup, err := wireApp(bc.Data, bc.Consumer, bc.Publisher, logger)
 	if err != nil {
 		panic(err)
 	}

@@ -9,6 +9,7 @@ import (
 	"order-service/internal/constants"
 	"order-service/internal/data"
 	"order-service/internal/data/entity"
+	"order-service/internal/publisher"
 	"order-service/internal/redis"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -16,13 +17,19 @@ import (
 )
 
 type OrdersHandler struct {
-	repo  data.OrdersRepository
-	redis redis.RedisHandlerInterface
-	log   *log.Helper
+	repo      data.OrdersRepository
+	redis     redis.RedisHandlerInterface
+	publisher publisher.PublisherInterface
+	log       *log.Helper
 }
 
-func NewOrdersHandler(repo data.OrdersRepository, cache redis.RedisHandlerInterface, logger log.Logger) interfaces.OrdersHandlerInterface {
-	return &OrdersHandler{repo, cache, log.NewHelper(logger)}
+func NewOrdersHandler(
+	repo data.OrdersRepository,
+	cache redis.RedisHandlerInterface,
+	publisher publisher.PublisherInterface,
+	logger log.Logger,
+) interfaces.OrdersHandlerInterface {
+	return &OrdersHandler{repo, cache, publisher, log.NewHelper(logger)}
 }
 
 func (h *OrdersHandler) GetOrdersForUser(ctx context.Context, userID string) ([]*v1.OrderData, error) {
@@ -51,12 +58,23 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *v1.CreateOrderRequ
 	order.ToProto(&orderData)
 
 	// Cache the order
-	cacheErr := h.redis.Set(ctx, orderData.Id, &order)
+	valueBytes, marErr := json.Marshal(&order)
+	if marErr != nil {
+		errMsg := fmt.Sprintf(constants.ErrorMarshalling, marErr)
+		h.log.WithContext(ctx).Error(errMsg)
+		return nil, errors.New(500, constants.MarshalError, errMsg)
+	}
+
+	cacheErr := h.redis.Set(ctx, orderData.Id, valueBytes)
 	if cacheErr != nil {
 		h.log.Errorf("error caching order: %v", cacheErr)
 	}
 
 	// Publish OrderCreated event
+	pubErr := h.publisher.PublishOrderEvents(constants.OrderPlaced, string(valueBytes), order.ID)
+	if pubErr != nil {
+		return nil, pubErr
+	}
 
 	h.log.WithContext(ctx).Infof("CreateOrder:: Order created successfully for orderID: %s", orderData.Id)
 	return &v1.CreateOrderReply{Order: &orderData, Success: true}, nil

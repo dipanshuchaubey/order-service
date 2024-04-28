@@ -2,7 +2,6 @@ package redis
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -26,7 +25,7 @@ type RedisCache struct {
 
 type RedisHandlerInterface interface {
 	Get(ctx context.Context, key string) (string, error)
-	Set(ctx context.Context, key string, value interface{}) error
+	Set(ctx context.Context, key string, value []byte) error
 }
 
 func NewCache(conf *conf.Data, logger log.Logger) RedisHandlerInterface {
@@ -66,15 +65,8 @@ func (r *RedisCache) Get(ctx context.Context, key string) (string, error) {
 	return val, nil
 }
 
-func (r *RedisCache) Set(ctx context.Context, key string, value interface{}) error {
-	valueBytes, marErr := json.Marshal(value)
-	if marErr != nil {
-		errMsg := fmt.Sprintf(constants.ErrorMarshalling, marErr)
-		r.log.Error(errMsg)
-		return errors.New(500, constants.MarshalError, errMsg)
-	}
-
-	err := r.client.Set(ctx, key, valueBytes, 0).Err()
+func (r *RedisCache) Set(ctx context.Context, key string, value []byte) error {
+	err := r.client.Set(ctx, key, value, 0).Err()
 
 	if err != nil {
 		errMsg := fmt.Sprintf(constants.RedisSetError, err)

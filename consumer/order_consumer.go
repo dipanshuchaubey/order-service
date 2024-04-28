@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"order-service/consumer/handler"
 	"order-service/internal/conf"
+	"order-service/internal/utils"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -29,13 +28,13 @@ func NewOrderConsumer(conf *conf.Consumer, handler handler.ISyncOrderHandler, lo
 }
 
 func (c *OrderConsumer) Consume() error {
-	c.log.Info("OrderConsumer:: Starting to consume messages from queue...")
 	ctx := context.TODO()
+	c.log.WithContext(ctx).Info("OrderConsumer:: Starting to consume messages from queue...")
 
 	// Create SQS session =--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=
-	must := c.createSQSSession()
+	must := utils.CreateAWSSession(c.conf.OrderConsumer.Region)
 	svc := sqs.New(must)
-	c.log.Info("OrderConsumer:: Session created successfully...")
+	c.log.WithContext(ctx).Info("OrderConsumer:: Session created successfully...")
 
 	for {
 		// Read messages from queue =--=--=--=--=--=--=--=--=--=--=--=--=
@@ -49,13 +48,13 @@ func (c *OrderConsumer) Consume() error {
 		}
 
 		ack := make([]*sqs.DeleteMessageBatchRequestEntry, 0)
-		c.log.Infof("Messages read from queue: %d", len(msgResult.Messages))
+		c.log.WithContext(ctx).Infof("Messages read from queue: %d", len(msgResult.Messages))
 		for _, message := range msgResult.Messages {
 			var body handler.MessageBody // TODO: Move this to types
 			decodeErr := json.Unmarshal([]byte(*message.Body), &body)
 			if decodeErr != nil {
 				errMsg := fmt.Sprintf("Error decoding message body: %s", decodeErr)
-				c.log.Errorf(errMsg)
+				c.log.WithContext(ctx).Errorf(errMsg)
 				continue
 			}
 
@@ -63,7 +62,7 @@ func (c *OrderConsumer) Consume() error {
 			decodeErr = json.Unmarshal([]byte(body.Message), &data)
 			if decodeErr != nil {
 				errMsg := fmt.Sprintf("Error decoding message data: %s", decodeErr)
-				c.log.Errorf(errMsg)
+				c.log.WithContext(ctx).Errorf(errMsg)
 				continue
 			}
 
@@ -78,22 +77,13 @@ func (c *OrderConsumer) Consume() error {
 			_, ackErr := c.acknowledgeQueueMessages(svc, ack)
 			if ackErr != nil {
 				errMsg := fmt.Sprintf("Error deleting messages from queue: %s", ackErr)
-				c.log.Errorf(errMsg)
+				c.log.WithContext(ctx).Errorf(errMsg)
 				return ackErr
 			}
 
 			c.log.Infof("Acknowledge messages from queue: %d", len(ack))
 		}
 	}
-}
-
-func (c *OrderConsumer) createSQSSession() *session.Session {
-	return session.Must(session.NewSessionWithOptions(session.Options{
-		Config: aws.Config{
-			Region:      aws.String(c.conf.OrderConsumer.Region),
-			Credentials: credentials.NewEnvCredentials(),
-		},
-	}))
 }
 
 func (c *OrderConsumer) readMessagesFromQueue(svc *sqs.SQS) (*sqs.ReceiveMessageOutput, error) {
@@ -106,7 +96,7 @@ func (c *OrderConsumer) readMessagesFromQueue(svc *sqs.SQS) (*sqs.ReceiveMessage
 		},
 		QueueUrl:            aws.String(c.conf.OrderConsumer.QueueUrl),
 		MaxNumberOfMessages: aws.Int64(10),
-		VisibilityTimeout:   aws.Int64(int64(c.conf.OrderConsumer.WaitTime)),
+		VisibilityTimeout:   aws.Int64(c.conf.OrderConsumer.WaitTime),
 	})
 }
 

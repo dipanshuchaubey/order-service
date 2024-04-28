@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"order-service/internal/biz/interfaces"
@@ -38,15 +39,32 @@ func (h *SyncOrderHandler) Handler(ctx context.Context, messageID string, messag
 }
 
 func (h *SyncOrderHandler) handleOrderPlaced(ctx context.Context, message MessageData) error {
-	h.log.WithContext(ctx).Info("SyncOrderHandler:: handleOrderPlaced :: ", message.OrderID)
+	payload, payloadErr := h.extractDataFromMessage(message)
+	if payloadErr != nil {
+		errMsg := fmt.Sprintf("SyncOrderHandler:: handleOrderPlaced :: Error extracting data from message: %s", payloadErr.Error())
+		h.log.WithContext(ctx).Error(errMsg)
+		return fmt.Errorf(errMsg)
+	}
 
-	_, err := h.osvc.UpdateOrder(ctx, message.OrderID)
+	h.log.WithContext(ctx).Info("SyncOrderHandler:: handleOrderPlaced :: ", payload.OrderID)
+
+	_, err := h.osvc.UpdateOrder(ctx, payload.OrderID)
 	if err != nil {
 		errMsg := fmt.Sprintf("SyncOrderHandler:: handleOrderPlaced :: Error updating order: %s", err.Error())
 		h.log.WithContext(ctx).Error(errMsg)
 		return fmt.Errorf(errMsg)
 	}
 
-	h.log.WithContext(ctx).Info("SyncOrderHandler:: handleOrderPlaced :: Order updated successfully for orderID: ", message.OrderID)
 	return nil
+}
+
+func (h *SyncOrderHandler) extractDataFromMessage(message MessageData) (MessageMeta, error) {
+	var data MessageMeta
+
+	err := json.Unmarshal([]byte(message.Data), &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
