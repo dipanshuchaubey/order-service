@@ -1,0 +1,47 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    app: order-service
+  name: order-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+      name: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: dipanshuchaubey/order-service:main
+          imagePullPolicy: Always
+          env:
+            - name: ENV
+              value: "dev"
+            - name: AWS_REGION
+              value: "ap-south-1"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+          ports:
+            - containerPort: 8000
+            - containerPort: 9000
+          volumeMounts:
+            - mountPath: "/mnt"
+              name: db-creds
+      volumes:
+        - name: db-creds
+          secret:
+            secretName: db-creds-file
+
