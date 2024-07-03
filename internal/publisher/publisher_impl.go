@@ -55,7 +55,7 @@ func (p PublisherHandler) createMessage(eventName, eventData string) (string, er
 	byteMsg, err := json.Marshal(message)
 	if err != nil {
 		p.log.Errorf(constants.ErrorMarshalling, err)
-		return "", err
+		return constants.EmptyString, err
 	}
 
 	return string(byteMsg), nil

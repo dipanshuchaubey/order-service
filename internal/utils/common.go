@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"order-service/internal/constants"
 	"os"
 	"slices"
 
@@ -15,7 +16,7 @@ func ReadConfigFile(path string) string {
 	envs := []string{"local", "dev", "uat", "prod"}
 
 	env := os.Getenv("ENV")
-	if env == "" || !slices.Contains(envs, env) {
+	if env == constants.EmptyString || !slices.Contains(envs, env) {
 		fmt.Println("No valid env provided, defaulting to local")
 		env = "local"
 	}
