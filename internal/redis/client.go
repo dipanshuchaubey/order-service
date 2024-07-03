@@ -34,7 +34,7 @@ func NewCache(conf *conf.Data, logger log.Logger) RedisHandlerInterface {
 
 	conn := redis.NewUniversalClient(&redis.UniversalOptions{
 		Addrs:        []string{conf.Redis.Addr},
-		Password:     "",
+		Password:     constants.EmptyString,
 		PoolSize:     int(conf.Redis.PoolSize),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
@@ -60,7 +60,7 @@ func (r *RedisCache) Get(ctx context.Context, key string) (string, error) {
 	if err != nil {
 		errMsg := fmt.Sprintf(constants.RedisGetError, err)
 		r.log.Error(errMsg)
-		return "", errors.New(500, constants.RedisError, errMsg)
+		return constants.EmptyString, errors.New(500, constants.RedisError, errMsg)
 	}
 	return val, nil
 }
