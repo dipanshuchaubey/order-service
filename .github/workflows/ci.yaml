@@ -25,8 +25,8 @@ jobs:
       - name: Generate coverage report
         run: |
           go get github.com/boumenot/gocover-cobertura
-          echo "$GOPATH/bin" >> $GITHUB_PATH
-          
+          go install github.com/boumenot/gocover-cobertura
+
           gocover-cobertura < coverage.out > coverage.xml
 
       - name: Build
