@@ -1,9 +1,8 @@
 name: Order Service CI
 on:
   push:
-    branches:
-      exclude:
-        - main
+    branches-ignore:
+      - master
 jobs:
   continuous-integration:
     runs-on: ubuntu-latest
