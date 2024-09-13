@@ -1,0 +1,42 @@
+name: Order Service CI
+on:
+  push:
+    branches:
+      exclude:
+        - main
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.22
+
+      - name: Lint check
+        run: make lint
+
+      - name: Run tests
+        run: make test
+
+      - name: Generate coverage report
+        run: |
+          go install github.com/boumenot/gocover-cobertura
+          gocover-cobertura < coverage.out > coverage.xml
+
+      - name: Build
+        run: make build
+
+      - name: Produce the coverage report
+        uses: insightsengineering/coverage-action@v2
+        with:
+          path: ./coverage.xml
+          threshold: 80
+          fail: false
+          publish: true
+          # diff: true
+          coverage-summary-title: "Code Coverage Summary"
