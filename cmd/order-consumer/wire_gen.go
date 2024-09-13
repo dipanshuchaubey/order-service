@@ -29,8 +29,8 @@ func wireApp(confData *conf.Data, confConsumer *conf.Consumer, confPublisher *co
 	redisHandlerInterface := redis.NewCache(confData, logger)
 	publisherInterface := publisher.NewPublisher(logger, confPublisher)
 	ordersHandlerInterface := biz.NewOrdersHandler(ordersRepository, redisHandlerInterface, publisherInterface, logger)
-	iSyncOrderHandler := handler.NewSyncOrderHandler(logger, ordersRepository, ordersHandlerInterface)
-	orderConsumer, err := consumer.NewOrderConsumer(confConsumer, iSyncOrderHandler, logger)
+	syncOrderInterface := handler.NewSyncOrderHandler(logger, ordersRepository, ordersHandlerInterface)
+	orderConsumer, err := consumer.NewOrderConsumer(confConsumer, syncOrderInterface, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

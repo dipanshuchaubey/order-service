@@ -18,7 +18,7 @@ type SyncOrderHandler struct {
 	osvc interfaces.OrdersHandlerInterface
 }
 
-func NewSyncOrderHandler(logger log.Logger, repo data.OrdersRepository, osvc interfaces.OrdersHandlerInterface) ISyncOrderHandler {
+func NewSyncOrderHandler(logger log.Logger, repo data.OrdersRepository, osvc interfaces.OrdersHandlerInterface) SyncOrderInterface {
 	return &SyncOrderHandler{log.NewHelper(logger), repo, osvc}
 }
 

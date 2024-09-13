@@ -15,11 +15,11 @@ import (
 
 type OrderConsumer struct {
 	log     *log.Helper
-	handler handler.ISyncOrderHandler
+	handler handler.SyncOrderInterface
 	conf    *conf.Consumer
 }
 
-func NewOrderConsumer(conf *conf.Consumer, handler handler.ISyncOrderHandler, logger log.Logger) (*OrderConsumer, error) {
+func NewOrderConsumer(conf *conf.Consumer, handler handler.SyncOrderInterface, logger log.Logger) (*OrderConsumer, error) {
 	return &OrderConsumer{
 		log:     log.NewHelper(logger),
 		handler: handler,

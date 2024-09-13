@@ -8,7 +8,7 @@ import (
 
 var ProviderSet = wire.NewSet(NewSyncOrderHandler)
 
-type ISyncOrderHandler interface {
+type SyncOrderInterface interface {
 	Handler(ctx context.Context, messageID string, message MessageData) error
 }
 
