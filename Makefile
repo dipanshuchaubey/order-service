@@ -63,6 +63,15 @@ all:
 	make config;
 	make generate;
 
+# test
+.PHONY: test
+test:
+	go test -v ./...
+
+lint:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
+	golangci-lint run
+
 # show help
 help:
 	@echo ''
