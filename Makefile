@@ -66,7 +66,7 @@ all:
 # test
 .PHONY: test
 test:
-	go test -v ./...
+	go test -v ./... -coverprofile=coverage.out
 
 lint:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
