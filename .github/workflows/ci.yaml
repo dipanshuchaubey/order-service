@@ -32,12 +32,15 @@ jobs:
       - name: Build
         run: make build
 
-      - name: Produce the coverage report
-        uses: insightsengineering/coverage-action@v2
-        with:
-          path: ./coverage.xml
-          threshold: 80
-          fail: false
-          publish: true
-          # diff: true
-          coverage-summary-title: "Code Coverage Summary"
+      # TODO: Fix permission issue 
+      # Refer: https://github.com/dipanshuchaubey/order-service/actions/runs/10856037612/job/30129903864
+      
+      # - name: Produce the coverage report
+      #   uses: insightsengineering/coverage-action@v2
+      #   with:
+      #     path: ./coverage.xml
+      #     threshold: 80
+      #     fail: false
+      #     publish: true
+      #     # diff: true
+      #     coverage-summary-title: "Code Coverage Summary"

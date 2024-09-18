@@ -1,6 +1,7 @@
 package publisher
 
 import (
+	"context"
 	"encoding/json"
 	"order-service/internal/conf"
 	"order-service/internal/constants"
@@ -23,7 +24,10 @@ func NewPublisher(logger log.Logger, conf *conf.Publisher) PublisherInterface {
 	return PublisherHandler{log.NewHelper(logger), conf, svc}
 }
 
-func (p PublisherHandler) PublishOrderEvents(eventName, eventData, orderId string) error {
+func (p PublisherHandler) PublishOrderEvents(ctx context.Context, eventName, eventData, orderId string) error {
+	ctx, span := utils.Trace(ctx, "publisher.PublishOrderEvents")
+	defer span.End()
+
 	message, msgErr := p.createMessage(eventName, eventData)
 	if msgErr != nil {
 		return msgErr
@@ -35,11 +39,11 @@ func (p PublisherHandler) PublishOrderEvents(eventName, eventData, orderId strin
 		MessageGroupId: &orderId,
 	})
 	if err != nil {
-		p.log.Errorf("Error publishing message to SNS: %s", err)
+		p.log.WithContext(ctx).Errorf("Error publishing message to SNS: %s", err)
 		return err
 	}
 
-	p.log.Infof("Message published to SNS: %s", message)
+	p.log.WithContext(ctx).Infof("Message published to SNS: %s", message)
 	return nil
 }
 
