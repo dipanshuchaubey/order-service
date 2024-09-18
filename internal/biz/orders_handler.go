@@ -11,6 +11,7 @@ import (
 	"order-service/internal/data/entity"
 	"order-service/internal/publisher"
 	"order-service/internal/redis"
+	"order-service/internal/utils"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -33,6 +34,11 @@ func NewOrdersHandler(
 }
 
 func (h *OrdersHandler) GetOrdersForUser(ctx context.Context, userID string) ([]*v1.OrderData, error) {
+	ctx, span := utils.Trace(ctx, "biz.GetOrdersForUser")
+	defer span.End()
+
+	h.log.WithContext(ctx).Infof("GetOrdersForUser:: Fetching orders for userID: %s", userID)
+
 	res, err := h.repo.GetOrdersByCustomerID(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -49,7 +55,11 @@ func (h *OrdersHandler) GetOrdersForUser(ctx context.Context, userID string) ([]
 }
 
 func (h *OrdersHandler) CreateOrder(ctx context.Context, req *v1.CreateOrderRequest) (*v1.CreateOrderReply, error) {
+	ctx, span := utils.Trace(ctx, "biz.CreateOrder")
+	defer span.End()
+
 	h.log.WithContext(ctx).Infof("CreateOrder:: Create order request: %v", req)
+
 	var order entity.OrdersEntity
 	order.FromCreateOrderRequest(req)
 
@@ -71,7 +81,7 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *v1.CreateOrderRequ
 	}
 
 	// Publish OrderCreated event
-	pubErr := h.publisher.PublishOrderEvents(constants.OrderPlaced, string(valueBytes), order.ID)
+	pubErr := h.publisher.PublishOrderEvents(ctx, constants.OrderPlaced, string(valueBytes), order.ID)
 	if pubErr != nil {
 		return nil, pubErr
 	}
