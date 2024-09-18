@@ -41,18 +41,18 @@ func (h *SyncOrderHandler) Handler(ctx context.Context, messageID string, messag
 func (h *SyncOrderHandler) handleOrderPlaced(ctx context.Context, message MessageData) error {
 	payload, payloadErr := h.extractDataFromMessage(message)
 	if payloadErr != nil {
-		errMsg := fmt.Sprintf("SyncOrderHandler:: handleOrderPlaced :: Error extracting data from message: %s", payloadErr.Error())
+		errMsg := fmt.Errorf("SyncOrderHandler:: handleOrderPlaced :: Error extracting data from message: %s", payloadErr.Error())
 		h.log.WithContext(ctx).Error(errMsg)
-		return fmt.Errorf(errMsg)
+		return errMsg
 	}
 
 	h.log.WithContext(ctx).Info("SyncOrderHandler:: handleOrderPlaced :: ", payload.OrderID)
 
 	_, err := h.osvc.UpdateOrder(ctx, payload.OrderID)
 	if err != nil {
-		errMsg := fmt.Sprintf("SyncOrderHandler:: handleOrderPlaced :: Error updating order: %s", err.Error())
+		errMsg := fmt.Errorf("SyncOrderHandler:: handleOrderPlaced :: Error updating order: %s", err.Error())
 		h.log.WithContext(ctx).Error(errMsg)
-		return fmt.Errorf(errMsg)
+		return errMsg
 	}
 
 	return nil

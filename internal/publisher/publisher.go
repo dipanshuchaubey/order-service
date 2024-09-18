@@ -1,6 +1,8 @@
 package publisher
 
 import (
+	"context"
+
 	"github.com/google/wire"
 )
 
@@ -9,5 +11,5 @@ var ProviderSet = wire.NewSet(NewPublisher)
 
 // Publisher interface
 type PublisherInterface interface {
-	PublishOrderEvents(eventName, eventData, orderId string) error
+	PublishOrderEvents(ctx context.Context, eventName, eventData, orderId string) error
 }

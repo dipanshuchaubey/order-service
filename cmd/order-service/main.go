@@ -50,6 +50,9 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 
 func main() {
 	flag.Parse()
+
+	utils.InitOtelInstrumentation()
+
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,

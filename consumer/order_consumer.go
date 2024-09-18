@@ -50,7 +50,7 @@ func (c *OrderConsumer) Consume() error {
 		ack := make([]*sqs.DeleteMessageBatchRequestEntry, 0)
 		c.log.WithContext(ctx).Infof("Messages read from queue: %d", len(msgResult.Messages))
 		for _, message := range msgResult.Messages {
-			var body handler.MessageBody // TODO: Move this to types
+			var body handler.MessageBody
 			decodeErr := json.Unmarshal([]byte(*message.Body), &body)
 			if decodeErr != nil {
 				errMsg := fmt.Sprintf("Error decoding message body: %s", decodeErr)
@@ -58,7 +58,7 @@ func (c *OrderConsumer) Consume() error {
 				continue
 			}
 
-			var data handler.MessageData // TODO: Move this to types
+			var data handler.MessageData
 			decodeErr = json.Unmarshal([]byte(body.Message), &data)
 			if decodeErr != nil {
 				errMsg := fmt.Sprintf("Error decoding message data: %s", decodeErr)
@@ -67,7 +67,11 @@ func (c *OrderConsumer) Consume() error {
 			}
 
 			// Process message =--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=
-			c.handler.Handler(ctx, body.MessageId, data)
+			err := c.handler.Handler(ctx, body.MessageId, data)
+			if err != nil {
+				c.log.WithContext(ctx).Errorf("Error processing message: %s", err)
+				continue
+			}
 
 			ack = append(ack, &sqs.DeleteMessageBatchRequestEntry{Id: &body.MessageId, ReceiptHandle: message.ReceiptHandle})
 		}

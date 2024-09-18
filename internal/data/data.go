@@ -36,15 +36,15 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	dsn := fmt.Sprintf(c.Database.Source, credentials.User, credentials.Password)
 	db, dbErr := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if dbErr != nil {
-		errMsg := fmt.Sprintf("Error opening database connection: %s", dbErr)
-		log.Errorf(errMsg)
+		errMsg := fmt.Errorf("error opening database connection: %s", dbErr)
+		log.Error(errMsg)
 		return nil, nil, dbErr
 	}
 
 	sqlDB, sqlDBErr := db.DB()
 	if sqlDBErr != nil {
-		errMsg := fmt.Sprintf("Error getting database connection: %s", sqlDBErr)
-		log.Errorf(errMsg)
+		errMsg := fmt.Errorf("error getting database connection: %s", sqlDBErr)
+		log.Error(errMsg)
 		return nil, nil, sqlDBErr
 	}
 

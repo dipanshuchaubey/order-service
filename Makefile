@@ -63,6 +63,21 @@ all:
 	make config;
 	make generate;
 
+# test
+.PHONY: test
+test:
+	go test -v ./... -coverprofile=coverage.out
+
+lint:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
+	golangci-lint run
+
+.PHONY: mocks
+# generate mocks
+mocks:
+	go install github.com/vektra/mockery/v2@v2.46.0
+	mockery --all
+
 # show help
 help:
 	@echo ''
