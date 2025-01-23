@@ -36,3 +36,10 @@ bin/
 .vscode/
 .idea/
 *.swp
+
+# Terraform files
+**/.terraform/*
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfplan
